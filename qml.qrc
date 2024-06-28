@@ -1,0 +1,23 @@
+<RCC>
+    <qresource prefix="/QML"/>
+    <qresource prefix="/">
+        <file>QML/BrowserDialog.qml</file>
+        <file>QML/main.qml</file>
+        <file>QML/BrowserWindow.qml</file>
+        <file>QML/BrowserWebView.qml</file>
+        <file>icons/collect.png</file>
+        <file>icons/home.png</file>
+        <file>icons/login.png</file>
+        <file>icons/logo.png</file>
+        <file>icons/new.png</file>
+        <file>icons/next.png</file>
+        <file>icons/plugins.png</file>
+        <file>icons/previous.png</file>
+        <file>icons/reload.png</file>
+        <file>icons/setting.png</file>
+        <file>icons/stop.png</file>
+        <file>QML/ToolbarButton.qml</file>
+        <file>QML/AddressBar.qml</file>
+        <file>QML/BrowserTab.qml</file>
+    </qresource>
+</RCC>
