@@ -1,3 +1,8 @@
+/**
+ * wfl:2024.06.28
+ * 定义浏览器事件行为
+ */
+
 import QtQuick 2.7
 import QtWebEngine 1.10
 import QtQuick.Controls 2.0
@@ -66,6 +71,30 @@ WebEngineView{
     }
 
     onRenderProcessTerminated: {    // 渲染出现异常事件
+        var status=""
+        switch(terminationStatus){
+        case WebEngineView.NormalTerminationStatus:
+            status="(normal exit)";
+            break;
+        case WebEngineView.AbnormalTerminationStatus:
+            status="(abnormal exit)";
+            break;
+        case WebEngineView.CrashedTerminationStatus:
+            status="(crashed exit)";
+            break;
+        case WebEngineView.KilledTerminationStatus:
+            status="(killed)";
+            break;
+        }
+        console.warn("Render process exited with status code"+exitCode+" "+status);
+        reloadTime.start();
+    }
 
+    Timer{      // 定时器
+        id: reloadTime
+        interval: 0
+        running: false
+        repeat: false
+        onTriggered: currentWebView.reload  // 当事件触发时候的行为
     }
 }

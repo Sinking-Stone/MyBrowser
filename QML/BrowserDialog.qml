@@ -1,3 +1,8 @@
+/**
+ * wfl:2024.06.28
+ * 浏览器对话框，目前用于测试
+ */
+
 import QtQuick 2.4
 import QtQuick.Window 2.2
 import QtWebEngine 1.4

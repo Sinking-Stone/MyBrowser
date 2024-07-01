@@ -18,7 +18,11 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+        BookMark.cpp \
         BrowserController.cpp \
+        History.cpp \
+        UrlFilter.cpp \
+        User.cpp \
         main.cpp \
         sqlitetool.cpp
 
@@ -39,6 +43,11 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
+    BookMark.h \
     BrowserController.h \
+    BrowserPluginInterface.h \
     DataStorage.h \
+    History.h \
+    UrlFilter.h \
+    User.h \
     sqlitetool.h

@@ -1,3 +1,8 @@
+/**
+ * wfl:2024.06.28
+ * 标签页按钮的各个组件
+ */
+
 import QtQuick 2.0
 import QtQuick.Controls 2.0
 import QtQuick.Layouts 1.0

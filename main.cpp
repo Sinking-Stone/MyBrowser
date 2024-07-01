@@ -3,6 +3,7 @@
 #include <QtWebEngine/QtWebEngine>
 #include "BrowserController.h"
 #include <QQmlContext>
+#include "BookMark.h"
 
 static QUrl startupUrl(){
     return QUrl(QStringLiteral("https://www.imooc.com/"));          // 先固定网页
@@ -20,8 +21,7 @@ int main(int argc, char *argv[])
     QtWebEngine::initialize();                                                  // 初始化web浏览器引擎，采用chromium内核
     BrowserController browserController;                                        // 创建QQmlContext类的目的是为了将browserController对象放在qml对象上，传递数据
     QQmlContext* qmlContext=engine.rootContext();                               // 获取根节点
-    qmlContext->setContextProperty("moocBrowserController",&browserController); // 将对象传入到qml页面上，第一个参数是对象名，第二个参数是对象地址
-    browserController.setmyValue(300);
+    qmlContext->setContextProperty("browserController",&browserController); // 将对象传入到qml页面上，第一个参数是对象名，第二个参数是对象地址
     // mycode add
 
     const QUrl url(QStringLiteral("qrc:/QML/main.qml"));
@@ -31,6 +31,10 @@ int main(int argc, char *argv[])
     // load qml and create window
     QMetaObject::invokeMethod(engine.rootObjects().first(),"load",Q_ARG(QVariant,startupUrl()));    // 当页面加载完之后向第一个元素的load方法传入startupUrl函数
 
+    BookMark bookMark;
+    if(bookMark.InsertOneRecord(0, "C++", "https://www.bilibili.com")){
 
+        qDebug()<<"Insert error";
+    }
     return app.exec();
 }

@@ -1,3 +1,8 @@
+/**
+ * wfl:2024.06.28
+ * 浏览器上部各个按钮控件
+ */
+
 import QtQuick 2.0
 import QtQuick.Controls 2.0
 

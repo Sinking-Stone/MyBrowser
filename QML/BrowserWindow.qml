@@ -1,3 +1,8 @@
+/**
+ * wfl:2024.06.28
+ * 主窗口，管理所有布局与组件
+ */
+
 import QtQuick 2.7
 import QtQml 2.2
 import QtWebEngine 1.4
@@ -63,25 +68,34 @@ ApplicationWindow {
         onActivated: currentWebView.triggerWebAction(WebEngineView.Back)
     }
     Shortcut{
-        sequence: StandardKey.Forward   // 后退  Alt+->
+        sequence: StandardKey.Forward   // 前进   Alt+->
         onActivated: currentWebView.triggerWebAction(WebEngineView.Forward)
     }
 
-    Shortcut{
-        sequence: StandardKey.Undo      //         Ctrl+z
-        onActivated: currentWebView.triggerWebAction(WebEngineView.Undo)
-    }
-    Shortcut{
-        sequence: StandardKey.Redo      // redo    Ctrl+y
-        onActivated: currentWebView.triggerWebAction(WebEngineView.Redo)
-    }
-    Shortcut{
-        sequence: StandardKey.Back      // 后退     Alt+<-
-        onActivated: currentWebView.triggerWebAction(WebEngineView.Back)
-    }
-    Shortcut{   // Ctrl+Tab
+    Shortcut{           // Ctrl+Tab 主要用于切换标签页，从左向右切换标签页
         sequence: "Ctrl+Tab"
-        onActivated: currentWebView.triggerWebAction(WebEngineView.Forward)
+        onActivated: tabs.currentIndex=Math.min(tabs.currentIndex+1,tabs.count-1)
+    }
+    Shortcut{           // Ctrl+Shift+Tab 主要用于切换标签页，从右向左切换标签页
+        sequence: "Ctrl+Shift+Tab"
+        onActivated: tabs.currentIndex=Math.max(tabs.currentIndex-1,0)
+    }
+
+    Shortcut{
+        sequence: StandardKey.Copy      // 复制    Ctrl+c
+        onActivated: currentWebView.triggerWebAction(WebEngineView.Copy)
+    }
+    Shortcut{
+        sequence: StandardKey.Cut       // 剪切    Ctrl+x
+        onActivated: currentWebView.triggerWebAction(WebEngineView.Cut)
+    }
+    Shortcut{
+        sequence: StandardKey.Paste     // 粘贴    Ctrl+v
+        onActivated: currentWebView.triggerWebAction(WebEngineView.Paste)
+    }
+    Shortcut{
+        sequence: StandardKey.SelectAll // 全选    Ctrl+a
+        onActivated: currentWebView.triggerWebAction(WebEngineView.SelectAll)
     }
 
 
@@ -171,34 +185,94 @@ ApplicationWindow {
                 currentWebView: browserWindow.currentWebView
             }// AddressBar
 
+
+            ToolbarButton{  // 用户登录注册
+                id: loginRegisterButton
+                iconSource: (browserController.userLogin!="test")?(browserController.getUserLogo(browserController.userLogin)):"qrc:/icons/login.png"
+                tooltip: qsTr("My Account")
+                onClicked: loginRegisterMenu.open()
+                activeFocusOnTab: !browserWindow.platformIsMac    // 对MacOS的全屏处理
+                Menu{           // 弹出菜单选项
+                    id: loginRegisterMenu
+                    y:parent.y+parent.height
+                    MenuItem{   // 设置是否加载图像
+                        id: registerMenu
+                        text: "Register"
+                        onTriggered: createRegisterUserWindow()
+                    }
+                    MenuItem{   // 设置是否加载js脚本
+                        id: loginMenu
+                        text: "Login"
+                        onTriggered: createLoginUserWindow()
+                    }
+                    MenuItem{   // 设置是否支持全屏
+                        id: unloginMenu
+                        text:"Unlogin"
+                        onTriggered: browserController.loginUser("test","123456");
+                    }
+                }
+            }// ToolbarButton
+
             ToolbarButton{
+                id: favoriteButton
+                iconSource: "qrc:/icons/collect.png"
+                tooltip: qsTr("My Favorite")
+                onRightClicked: createBookMarkWindow()
+                enabled: currentWebView&&currentWebView.title!==""&&currentWebView.url!==""
+                onClicked: {
+                    browserController.bookMark=currentWebView.title+",--,"+currentWebView.url
+                    bookMarkText.text=currentWebView.title+"add to My Bookmark"
+                    resetbookMarkText.start()
+                }
+                activeFocusOnTab: !browserWindow.platformIsMac    // 对MacOS的全屏处理
+
+                Text{   // 当用户添加书签时，展示书签信息在图标界面上
+                    objectName: "bookMarkInfo"
+                    id: bookMarkText
+                    color: "red"
+                    width: addressBar.x
+                    height: favoriteButton.buttom+200
+                    anchors.centerIn: parent
+                    elide: Qt.ElideMiddle   // 若展示不全，则中间省略
+                }
+                Timer{
+                    id: resetbookMarkText
+                    interval: 750
+                    onTriggered: {
+                        bookMarkText.text=""
+                        resetbookMarkText.stop()
+                    }
+                }
+            }// ToolbarButton
+
+            ToolbarButton{  //浏览器设置按钮
                 id: settingButton
                 iconSource: "qrc:/icons/setting.png"
                 tooltip: qsTr("Setting")
                 onClicked: settingsMenu.open()
                 activeFocusOnTab: !browserWindow.platformIsMac    // 对MacOS的全屏处理
-                Menu{
+                Menu{           // 弹出菜单选项
                     id:settingsMenu
                     y:parent.y+parent.height
-                    MenuItem{
+                    MenuItem{   // 设置是否加载图像
                         id:loadImages
                         text:"Autoload Images"
                         checkable: true
                         checked: WebEngine.settings.autoLoadImages
                     }
-                    MenuItem{
+                    MenuItem{   // 设置是否加载js脚本
                         id:javaScriptEnabled
                         text:"JavaScript On"
                         checkable: true
                         checked: WebEngine.settings.javascriptEnabled
                     }
-                    MenuItem{
+                    MenuItem{   // 设置是否开启错误页面
                         id:errorPageEnabled
                         text:"ErrorPage On"
                         checkable: true
                         checked: WebEngine.settings.errorPageEnabled
                     }
-                    MenuItem{
+                    MenuItem{   // 设置是否支持全屏
                         id:fullScreenSupportEnabled
                         text:"FullScreen Request"
                         checkable: true
@@ -206,7 +280,8 @@ ApplicationWindow {
                     }
                 }
             }// ToolbarButton
-            ToolbarButton{
+
+            ToolbarButton{  // 返回主页按钮
                 id: homePageButton
                 iconSource: "qrc:/icons/home.png"
                 tooltip: qsTr("HomePage")
@@ -214,6 +289,22 @@ ApplicationWindow {
                 activeFocusOnTab: !browserWindow.platformIsMac    // 对MacOS的全屏处理
             }// ToolbarButton
 
+            ToolbarButton{
+                id: pluginsButton
+                iconSource: "qrc:/icons/plugins.png"
+                tooltip: qsTr("Plugins")
+                onClicked: pluginsMenu.open()
+                activeFocusOnTab: !browserWindow.platformIsMac    // 对MacOS的全屏处理
+                Menu{           // 弹出菜单选项
+                    id: pluginsMenu
+                    y:parent.y+parent.height
+                    MenuItem{   // 设置是否加载图像
+                        id: snapshotMenu
+                        text: "snapshot"
+                        onTriggered: browserController.doSnapshot("snapshot")
+                    }
+                }
+            }// ToolbarButton
         }// RowLayout
 
         // ProgressBar进度条
@@ -248,26 +339,20 @@ ApplicationWindow {
         id: browserTabComponent
         BrowserWebView{                 // 这个表示BrowserWebView文件，表示在这里会创建BrowserWebView的实例
             onWindowCloseRequested: {   // 关闭事件，主要是实现标签页的关闭
-                try{
-                    if(tabs.count==1){
-                        browserWindow.close();
-                    }else{
-                        var tabCount=browserViewLayout.children.length;
-                        for(var i=0;i<tabCount;i++){    //
-                            var tab=browserViewLayout.children[i];
-                            if(tab===this){
-                                browserViewLayout.children[i].destroy();
-                                tabs.removeItem(i);
-                                tabs.currentIndex=tab.count-1;
-                                break;
-                            }
+                if(tabs.count==1){
+                    browserWindow.close();
+                }else{
+                    var tabCount=browserViewLayout.children.length;
+                    for(var i=0;i<tabCount;i++){    //
+                        var tab=browserViewLayout.children[i];
+                        if(tab===this){
+                            browserViewLayout.children[i].destroy();
+                            tabs.removeItem(i);
+                            tabs.currentIndex=tabs.count-1;
+                            break;
                         }
                     }
                 }
-                catch(err){
-                    console.error(err)
-                }
-
             }
         }
     }

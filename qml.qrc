@@ -19,5 +19,8 @@
         <file>QML/ToolbarButton.qml</file>
         <file>QML/AddressBar.qml</file>
         <file>QML/BrowserTab.qml</file>
+        <file>QML/BookMarkWindow.qml</file>
+        <file>QML/RegisterWindow.qml</file>
+        <file>QML/LoginWindow.qml</file>
     </qresource>
 </RCC>
