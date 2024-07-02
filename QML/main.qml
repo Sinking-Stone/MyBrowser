@@ -33,6 +33,10 @@ QtObject{
         onClosing:destroy()
     }
 
+    property  Component browserHistoryComponent: HistoryWindow{   // 用browserHistoryComponent来表示HistoryWindow文件
+        onClosing:destroy()
+    }
+
     property  Component registerWindowComponent: RegisterWindow{  // 用registerWindowComponent来表示RegisterWindow文件
         // @disable-check M16
         onClosing:destroy()
@@ -57,6 +61,11 @@ QtObject{
 
     function createBookMarkWindow(profile){
         var newWindow=browserBookMarkComponent.createObject(root) // 用browserWindowComponent创建一个对象
+        return newWindow
+    }
+
+    function createHistoryWindow(profile){
+        var newWindow=browserHistoryComponent.createObject(root) // 用browserWindowComponent创建一个对象
         return newWindow
     }
 

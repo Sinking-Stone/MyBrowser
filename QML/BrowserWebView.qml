@@ -21,6 +21,8 @@ WebEngineView{
     settings.errorPageEnabled: appSettings.errorPageEnabled;
     settings.fullScreenSupportEnabled: appSettings.fullScreenSupportedEnabled;
 
+    property bool processingUrlChange: false;
+
     WebEngineProfile {      // 浏览器设置所必须的
         id: webProfile
     }
@@ -34,8 +36,26 @@ WebEngineView{
         }
     }
 
+    // 将URL转为符合规范的范围形式：www.baidu.com-> https://www.baidu.com
+    // 将text:搜索内容 -> https://www.baidu.com/s?wd=搜索内容
     onUrlChanged: {         // url改变的信号
+        if(processingUrlChange) {
+            return
+        }
+        processingUrlChange=true
+        console.info("before:"+currentWebView.url)
+        currentWebView.url=browserController.handleUrlRequest(currentWebView.url)
+        console.info("after:"+currentWebView.url)
+        processingUrlChange=false
+    }
 
+    onTitleChanged: {
+        if(currentWebView&&currentWebView.title!==""&&currentWebView.url!==""){ // 为了防止title与URL为空的情况
+            var url=currentWebView.url.toString()
+            if(url.endsWith("/")) url=url.slice(0,-1);
+            if(url!==currentWebView.title&&url!=="qrc:/QML/errorInfo.html")     // 防止url与title相同的情况
+                browserController.history=currentWebView.title+",--,"+currentWebView.url;
+        }
     }
 
     onCertificateError: {   // 证书错误，验证网站是否合法

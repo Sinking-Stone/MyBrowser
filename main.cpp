@@ -6,7 +6,7 @@
 #include "BookMark.h"
 
 static QUrl startupUrl(){
-    return QUrl(QStringLiteral("https://www.imooc.com/"));          // 先固定网页
+    return QUrl(QStringLiteral("https://www.baidu.com/"));          // 先固定网页
 }
 
 int main(int argc, char *argv[])
@@ -31,10 +31,5 @@ int main(int argc, char *argv[])
     // load qml and create window
     QMetaObject::invokeMethod(engine.rootObjects().first(),"load",Q_ARG(QVariant,startupUrl()));    // 当页面加载完之后向第一个元素的load方法传入startupUrl函数
 
-    BookMark bookMark;
-    if(bookMark.InsertOneRecord(0, "C++", "https://www.bilibili.com")){
-
-        qDebug()<<"Insert error";
-    }
     return app.exec();
 }

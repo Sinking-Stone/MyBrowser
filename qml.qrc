@@ -22,5 +22,9 @@
         <file>QML/BookMarkWindow.qml</file>
         <file>QML/RegisterWindow.qml</file>
         <file>QML/LoginWindow.qml</file>
+        <file>icons/history.png</file>
+        <file>QML/HistoryWindow.qml</file>
+        <file>QML/errorInfo.html</file>
+        <file>QML/404.png</file>
     </qresource>
 </RCC>

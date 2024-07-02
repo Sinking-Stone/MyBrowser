@@ -222,7 +222,7 @@ QVariantList SqliteTool::selectHistory(){
     QVariantList resultList;
     QSqlQuery query;
     query.prepare("SELECT * FROM History");
-    if(query.next()){
+    if(query.exec()){
         while (query.next()) {
             QSqlRecord record=query.record();
             QMap<QString,QVariant> row;

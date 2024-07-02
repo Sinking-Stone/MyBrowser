@@ -27,7 +27,7 @@ ApplicationWindow {
     Component.onCompleted: flags=flags|Qt.WindowFullScreenButtonHint
 
     Settings{
-        id:appSettings
+        id: appSettings
         category: "Browser"
         property alias autoLoadImages: loadImages.checked;
         property alias javascriptEnabled: javaScriptEnabled.checked;
@@ -112,7 +112,7 @@ ApplicationWindow {
                 tooltip: qsTr("Back")
                 onClicked: currentWebView.goBack()  // 返回到上一个页面中
                 enabled: currentWebView && currentWebView.canGoBack
-                activeFocusOnTab: !platformIsMac    // 对MacOS的全屏处理
+                activeFocusOnTab: !browserWindow.platformIsMac    // 对MacOS的全屏处理
                 onPressAndHold: backMenu.open()
                 onRightClicked: backMenu.open()     // 鼠标行为，右键按压
                 Menu{                               // 返回到指定的页面
@@ -140,8 +140,8 @@ ApplicationWindow {
                 tooltip: qsTr("Forward")
                 onClicked: currentWebView.goForward()
                 enabled: currentWebView&&currentWebView.canGoForward
-                activeFocusOnTab: !platformIsMac    // 对MacOS的全屏处理
-                onPressAndHold: forwardMenu.open()     // 鼠标行为
+                activeFocusOnTab: !browserWindow.platformIsMac    // 对MacOS的全屏处理
+                onPressAndHold: forwardMenu.open()  // 鼠标行为
                 onRightClicked: forwardMenu.open()
                 Menu{                               // 返回到指定的页面
                     id:forwardMenu
@@ -168,7 +168,6 @@ ApplicationWindow {
                 iconSource: loading?"qrc:/icons/reload.png":"qrc:/icons/stop.png"
                 tooltip: loading?qsTr("Stop"):qsTr("Refresh")
                 onClicked: loading?currentWebView.stop():currentWebView.reload()
-                enabled: currentWebView && currentWebView.canGoBack
                 activeFocusOnTab: !browserWindow.platformIsMac    // 对MacOS的全屏处理
             }// ToolbarButton
             ToolbarButton{
@@ -245,6 +244,22 @@ ApplicationWindow {
                 }
             }// ToolbarButton
 
+            ToolbarButton{  // 历史按钮
+                id: historyPageButton
+                iconSource: "qrc:/icons/history.png"
+                tooltip: qsTr("HistoryPage")
+                onClicked: createHistoryWindow()
+                activeFocusOnTab: !browserWindow.platformIsMac    // 对MacOS的全屏处理
+            }// ToolbarButton
+
+            ToolbarButton{  // 返回主页按钮
+                id: homePageButton
+                iconSource: "qrc:/icons/home.png"
+                tooltip: qsTr("HomePage")
+                onClicked: currentWebView.url="https://www.baidu.com"
+                activeFocusOnTab: !browserWindow.platformIsMac    // 对MacOS的全屏处理
+            }// ToolbarButton
+
             ToolbarButton{  //浏览器设置按钮
                 id: settingButton
                 iconSource: "qrc:/icons/setting.png"
@@ -255,38 +270,51 @@ ApplicationWindow {
                     id:settingsMenu
                     y:parent.y+parent.height
                     MenuItem{   // 设置是否加载图像
-                        id:loadImages
+                        id: loadImages
                         text:"Autoload Images"
                         checkable: true
                         checked: WebEngine.settings.autoLoadImages
                     }
                     MenuItem{   // 设置是否加载js脚本
-                        id:javaScriptEnabled
+                        id: javaScriptEnabled
                         text:"JavaScript On"
                         checkable: true
                         checked: WebEngine.settings.javascriptEnabled
                     }
                     MenuItem{   // 设置是否开启错误页面
-                        id:errorPageEnabled
+                        id: errorPageEnabled
                         text:"ErrorPage On"
                         checkable: true
                         checked: WebEngine.settings.errorPageEnabled
                     }
                     MenuItem{   // 设置是否支持全屏
-                        id:fullScreenSupportEnabled
+                        id: fullScreenSupportEnabled
                         text:"FullScreen Request"
                         checkable: true
                         checked: WebEngine.settings.fullScreenSupportEnabled
                     }
+                    MenuItem{   // 设置是否为无痕浏览器
+                        id: offTheRecordEnabled
+                        text:"Incognito"
+                        checkable: true
+                        checked: !browserController.isRecord
+                        onCheckedChanged: {
+                            checked == !checked
+                            if(checked) browserController.isRecord=false    //如果不记录表示无痕
+                            else browserController.isRecord=true
+                        }
+                    }
+                    MenuItem{   // 设置是否开启错误页面
+                        id: zoomInMenu
+                        text:"zoom in"
+                        onTriggered: currentWebView.triggerWebAction(WebEngineView.ZoomIn)
+                    }
+                    MenuItem{   // 设置是否支持全屏
+                        id: zoomOutMenu
+                        text:"zoom out"
+                        onTriggered: currentWebView.triggerWebAction(WebEngineView.ZoomOut)
+                    }
                 }
-            }// ToolbarButton
-
-            ToolbarButton{  // 返回主页按钮
-                id: homePageButton
-                iconSource: "qrc:/icons/home.png"
-                tooltip: qsTr("HomePage")
-                onClicked: currentWebView.url="https://www.baidu.com"
-                activeFocusOnTab: !browserWindow.platformIsMac    // 对MacOS的全屏处理
             }// ToolbarButton
 
             ToolbarButton{
@@ -381,9 +409,26 @@ ApplicationWindow {
         }
     }
 
+    MouseArea{
+        anchors.fill: browserViewLayout
+        acceptedButtons: Qt.BackButton|Qt.ForwardButton
+        // @disable-check M2
+        cursorShape: undefined
+        onClicked: {
+            if(!currentWebView||currentWebView.url==="")
+                return;
+            if(mouse.button===Qt.BackButton){
+                currentWebView.triggerWebAction(WebEngineView.Back)
+            }else if(mouse.button===Qt.ForwardButton){
+                currentWebView.triggerWebAction(WebEngineView.Forward)
+            }
+        }
+    }
+
     Pane{       // 添加鼠标悬停时显示链接
         id:statusBubble
 
+        anchors.left: parent.left
         anchors.bottom: parent.bottom   // 显示在父类的底部
         visible: statusText.text!==""
 

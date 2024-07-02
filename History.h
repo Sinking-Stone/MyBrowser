@@ -12,7 +12,7 @@ public:
     ~History();
 
     bool InsertOneHistory(const QString& title, const QString& url);
-    QVariantList SelectHistory();
+    QVariantList SelectHistory();   // 查询出所有的记录
     bool RemoveOneHistory(int historyId);
 private:
     SqliteTool m_sqlTool;

@@ -18,7 +18,7 @@ class BrowserController : public QObject
     Q_OBJECT
     // Q_PROPERTY的说明参考连接：https://blog.csdn.net/m0_74091159/article/details/139039490
     // 用于声明一个类的属性，并将其与类中的成员变量或成员函数关联起来。这使得属性可以通过Qt元对象系统进行访问和操作。
-    Q_PROPERTY(bool isRecord READ isRecord WRITE setisRecord NOTIFY isRecordChanged)        // 信号和槽的集成，记录
+    Q_PROPERTY(bool isRecord READ isRecord WRITE setisRecord NOTIFY isRecordChanged)        // 信号和槽的集成，记录，表示正常浏览器，不记录表示无痕浏览器
     Q_PROPERTY(QString bookMark READ bookMark WRITE setbookMark NOTIFY bookMarkChanged)     // 信号和槽的集成，书签
     Q_PROPERTY(QString userLogin READ userLogin WRITE setuserLogin NOTIFY userLoginChanged) // 信号和槽的集成，用户登录
     Q_PROPERTY(QString history READ history WRITE sethistory NOTIFY historyChanged)         // 信号和槽的集成，历史记录
@@ -130,7 +130,10 @@ public slots:
     }
 
     QUrl handleUrlRequest(const QUrl& url){
-        return m_urlFilter->handleUrlRequest(url);
+        qDebug()<<url;
+        QUrl ans=m_urlFilter->handleUrlRequest(url);
+        qDebug()<<ans;
+        return ans;
     }
 
 signals:

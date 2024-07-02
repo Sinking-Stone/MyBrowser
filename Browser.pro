@@ -3,6 +3,7 @@ QT += quick
 QT += webengine
 QT += webenginewidgets
 QT += sql
+QT += network
 
 CONFIG += c++11
 

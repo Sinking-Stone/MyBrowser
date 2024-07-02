@@ -9,15 +9,15 @@ import QtQuick.Dialogs 1.2
 import Qt.labs.settings 1.0
 
 ApplicationWindow {
-    id: bookMarkWindow
+    id: historyWindow
     width: 400
     height: 500
     visible: true
-    title: browserController.userLogin+" in Browser BookMarks"
+    title: "My Browser history"
 
     Component.onCompleted: {    // 加载页面完成时，从数据库中获取书签列表
         dataModel.clear()
-        dataModel.append(browserController.fetchBookMark())
+        dataModel.append(browserController.fetchHistory())
     }
 
     RowLayout{
@@ -32,12 +32,16 @@ ApplicationWindow {
                     Text{text: model.title}
                     Text {
                         text: model.url
-                        color: "#0000FF"
+                        color: "#FF0000"
                         MouseArea{
                             anchors.fill: parent
                             onClicked: load(model.url)
                         }
                     }// Text
+                    Text {
+                        text: model.createTime
+                        color: "#00FF00"
+                    }
 
                     Button{ // 添加remove按钮，调用removeBookMark删除数据库中的书签
                         id: removeBookMarkBtn
@@ -45,9 +49,9 @@ ApplicationWindow {
                         width: 70
                         text: "remove"
                         onClicked: {
-                            browserController.removeBookMark(browserController.getUserId(browserController.userLogin),model.url)
+                            browserController.removeHistory(model.historyID)
                             dataModel.clear()
-                            dataModel.append(browserController.fetchBookMark()) // 删除掉书签之后及时更新书签内容
+                            dataModel.append(browserController.fetchHistory()) // 删除掉历史之后及时更新历史内容
                         }
                     }
                 }// Row
@@ -57,7 +61,7 @@ ApplicationWindow {
             id: reloadBtn
             visible: true
             height: 20
-            width: bookMarkWindow.width
+            width: historyWindow.width
             z:9999
             anchors{
                 bottom: parent.bottom
@@ -68,7 +72,7 @@ ApplicationWindow {
             text: "reload"
             onClicked: {
                 dataModel.clear()
-                dataModel.append(browserController.fetchBookMark())
+                dataModel.append(browserController.fetchHistory())
             }
         }// Button
     }// RowLayout
