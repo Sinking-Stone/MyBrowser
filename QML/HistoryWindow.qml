@@ -13,7 +13,7 @@ ApplicationWindow {
     width: 400
     height: 500
     visible: true
-    title: "My Browser history"
+    title: qsTr("My Browser history")
 
     Component.onCompleted: {    // 加载页面完成时，从数据库中获取书签列表
         dataModel.clear()
@@ -47,7 +47,7 @@ ApplicationWindow {
                         id: removeBookMarkBtn
                         height: 20
                         width: 70
-                        text: "remove"
+                        text: qsTr("remove")
                         onClicked: {
                             browserController.removeHistory(model.historyID)
                             dataModel.clear()
@@ -69,7 +69,7 @@ ApplicationWindow {
                 right: parent.right
             }
 
-            text: "reload"
+            text: qsTr("reload")
             onClicked: {
                 dataModel.clear()
                 dataModel.append(browserController.fetchHistory())

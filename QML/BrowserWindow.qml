@@ -19,7 +19,7 @@ ApplicationWindow {
     width: 1300
     height: 900
     visible: true
-    title: currentWebView&&currentWebView.title!==" "?currentWebView.title:"My Browser"
+    title: currentWebView&&currentWebView.title!==" "?currentWebView.title:qsTr("My Browser")
 
     // MAC OS UI
     readonly property bool platformIsMac: Qt.platform==="osx"   //  设置属性platformIsMac判断是否为MacOS
@@ -96,6 +96,14 @@ ApplicationWindow {
     Shortcut{
         sequence: StandardKey.SelectAll // 全选    Ctrl+a
         onActivated: currentWebView.triggerWebAction(WebEngineView.SelectAll)
+    }
+    Shortcut{
+        sequence: "Ctrl+Alt+1"          // 缩小
+        onActivated: currentWebView.triggerWebAction(WebEngineView.ZoomIn)
+    }
+    Shortcut{
+        sequence: "Ctrl+Alt+2"          // 放大
+        onActivated: currentWebView.triggerWebAction(WebEngineView.ZoomOut)
     }
 
 
@@ -196,17 +204,17 @@ ApplicationWindow {
                     y:parent.y+parent.height
                     MenuItem{   // 设置是否加载图像
                         id: registerMenu
-                        text: "Register"
+                        text: qsTr("Register")
                         onTriggered: createRegisterUserWindow()
                     }
                     MenuItem{   // 设置是否加载js脚本
                         id: loginMenu
-                        text: "Login"
+                        text:  qsTr("Login")
                         onTriggered: createLoginUserWindow()
                     }
                     MenuItem{   // 设置是否支持全屏
                         id: unloginMenu
-                        text:"Unlogin"
+                        text:  qsTr("Unlogin")
                         onTriggered: browserController.loginUser("test","123456");
                     }
                 }
@@ -215,7 +223,7 @@ ApplicationWindow {
             ToolbarButton{
                 id: favoriteButton
                 iconSource: "qrc:/icons/collect.png"
-                tooltip: qsTr("My Favorite")
+                tooltip: qsTr("My BookMark")
                 onRightClicked: createBookMarkWindow()
                 enabled: currentWebView&&currentWebView.title!==""&&currentWebView.url!==""
                 onClicked: {
@@ -247,7 +255,7 @@ ApplicationWindow {
             ToolbarButton{  // 历史按钮
                 id: historyPageButton
                 iconSource: "qrc:/icons/history.png"
-                tooltip: qsTr("HistoryPage")
+                tooltip: qsTr("History")
                 onClicked: createHistoryWindow()
                 activeFocusOnTab: !browserWindow.platformIsMac    // 对MacOS的全屏处理
             }// ToolbarButton
@@ -271,31 +279,31 @@ ApplicationWindow {
                     y:parent.y+parent.height
                     MenuItem{   // 设置是否加载图像
                         id: loadImages
-                        text:"Autoload Images"
+                        text: qsTr("Autoload Images")
                         checkable: true
                         checked: WebEngine.settings.autoLoadImages
                     }
                     MenuItem{   // 设置是否加载js脚本
                         id: javaScriptEnabled
-                        text:"JavaScript On"
+                        text: qsTr("JavaScript On")
                         checkable: true
                         checked: WebEngine.settings.javascriptEnabled
                     }
                     MenuItem{   // 设置是否开启错误页面
                         id: errorPageEnabled
-                        text:"ErrorPage On"
+                        text: qsTr("ErrorPage On")
                         checkable: true
                         checked: WebEngine.settings.errorPageEnabled
                     }
                     MenuItem{   // 设置是否支持全屏
                         id: fullScreenSupportEnabled
-                        text:"FullScreen Request"
+                        text: qsTr("FullScreen Support")
                         checkable: true
                         checked: WebEngine.settings.fullScreenSupportEnabled
                     }
                     MenuItem{   // 设置是否为无痕浏览器
                         id: offTheRecordEnabled
-                        text:"Incognito"
+                        text: qsTr("Incognito")
                         checkable: true
                         checked: !browserController.isRecord
                         onCheckedChanged: {
@@ -304,14 +312,38 @@ ApplicationWindow {
                             else browserController.isRecord=true
                         }
                     }
-                    MenuItem{   // 设置是否开启错误页面
+
+                    MenuItem{   // 设置是否显示广告
+                        id: offPreventAds
+                        text: qsTr("Prevent Ads")
+                        checkable: true
+                        checked: !browserController.isPreventAds
+                        onCheckedChanged: {
+                            checked == !checked
+//                            if(checked) browserController.isPreventAds=true    // 表示过滤广告
+//                            else browserController.isPreventAds=false
+                        }
+                    }
+
+                    ComboBox{   // 语言选择
+                        id: languageComboBox
+                        model: ["中文","English"]
+                        onCurrentIndexChanged: {
+                            switch(currentIndex){
+                            case 0: browserController.setLanguage(0);break;
+                            case 1: browserController.setLanguage(1);break;
+                            }
+                        }
+                    }
+
+                    MenuItem{   // 放大
                         id: zoomInMenu
-                        text:"zoom in"
+                        text: qsTr("zoom in")
                         onTriggered: currentWebView.triggerWebAction(WebEngineView.ZoomIn)
                     }
-                    MenuItem{   // 设置是否支持全屏
+                    MenuItem{   // 缩小
                         id: zoomOutMenu
-                        text:"zoom out"
+                        text: qsTr("zoom out")
                         onTriggered: currentWebView.triggerWebAction(WebEngineView.ZoomOut)
                     }
                 }
@@ -328,7 +360,7 @@ ApplicationWindow {
                     y:parent.y+parent.height
                     MenuItem{   // 设置是否加载图像
                         id: snapshotMenu
-                        text: "snapshot"
+                        text: qsTr("snapshot")
                         onTriggered: browserController.doSnapshot("snapshot")
                     }
                 }

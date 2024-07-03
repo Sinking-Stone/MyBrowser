@@ -22,12 +22,16 @@ SOURCES += \
         BookMark.cpp \
         BrowserController.cpp \
         History.cpp \
+        LanguageTranslator.cpp \
         UrlFilter.cpp \
         User.cpp \
+        logger.cpp \
         main.cpp \
+        setting.cpp \
         sqlitetool.cpp
 
-RESOURCES += qml.qrc
+RESOURCES += qml.qrc \
+    translator.qrc
 
 TRANSLATIONS += \
     Browser_zh_CN.ts
@@ -44,11 +48,20 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
+    AdBlockInterceptor.h \
     BookMark.h \
     BrowserController.h \
     BrowserPluginInterface.h \
     DataStorage.h \
     History.h \
+    LanguageTranslator.h \
+    Singleton.h \
     UrlFilter.h \
     User.h \
+    logger.h \
+    setting.h \
     sqlitetool.h
+
+DISTFILES += \
+    Browser_en_US.ts \
+    Browser_en_US.ts

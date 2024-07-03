@@ -5,7 +5,7 @@ import QtQuick.Dialogs 1.0
 
 Window {
     id: loginWindow
-    title: "LoginDialog"
+    title: qsTr("LoginDialog")
     width: 400
     height: 400
     visible: true
@@ -16,12 +16,12 @@ Window {
 
         TextField{
             id: userNameField
-            placeholderText: "userName:"
+            placeholderText: qsTr("userName:")
         }
 
         TextField{
             id: passwordField
-            placeholderText: "userName:"
+            placeholderText: qsTr("password:")
             echoMode: TextInput.Password
         }
 
@@ -29,7 +29,7 @@ Window {
             spacing: 10
             Button{
                 id: loginButton
-                text: "login"
+                text: qsTr("login")
                 onClicked: {
                     // 需要先判断一下，用户是否存在
                     browserController.loginUser(userNameField.text,passwordField.text)

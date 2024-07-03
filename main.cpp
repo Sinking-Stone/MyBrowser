@@ -3,7 +3,7 @@
 #include <QtWebEngine/QtWebEngine>
 #include "BrowserController.h"
 #include <QQmlContext>
-#include "BookMark.h"
+#include <QWebEngineProfile>
 
 static QUrl startupUrl(){
     return QUrl(QStringLiteral("https://www.baidu.com/"));          // 先固定网页
@@ -19,7 +19,7 @@ int main(int argc, char *argv[])
 
     // mycode add
     QtWebEngine::initialize();                                                  // 初始化web浏览器引擎，采用chromium内核
-    BrowserController browserController;                                        // 创建QQmlContext类的目的是为了将browserController对象放在qml对象上，传递数据
+    BrowserController browserController(app,engine);                                        // 创建QQmlContext类的目的是为了将browserController对象放在qml对象上，传递数据
     QQmlContext* qmlContext=engine.rootContext();                               // 获取根节点
     qmlContext->setContextProperty("browserController",&browserController); // 将对象传入到qml页面上，第一个参数是对象名，第二个参数是对象地址
     // mycode add

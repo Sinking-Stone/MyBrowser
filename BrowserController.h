@@ -12,6 +12,14 @@
 #include "BrowserPluginInterface.h"
 #include "History.h"
 #include "UrlFilter.h"
+#include "LanguageTranslator.h"
+#include "AdBlockInterceptor.h"
+#include "logger.h"
+#include "setting.h"
+
+#include <QWebEngineProfile>
+#include <QWebEngineCookieStore>
+#include <QWebEngineView>
 
 class BrowserController : public QObject
 {
@@ -19,12 +27,13 @@ class BrowserController : public QObject
     // Q_PROPERTY的说明参考连接：https://blog.csdn.net/m0_74091159/article/details/139039490
     // 用于声明一个类的属性，并将其与类中的成员变量或成员函数关联起来。这使得属性可以通过Qt元对象系统进行访问和操作。
     Q_PROPERTY(bool isRecord READ isRecord WRITE setisRecord NOTIFY isRecordChanged)        // 信号和槽的集成，记录，表示正常浏览器，不记录表示无痕浏览器
+    Q_PROPERTY(bool isPreventAds READ isPreventAds WRITE setisPreventAds NOTIFY isPreventAdsChanged)
     Q_PROPERTY(QString bookMark READ bookMark WRITE setbookMark NOTIFY bookMarkChanged)     // 信号和槽的集成，书签
     Q_PROPERTY(QString userLogin READ userLogin WRITE setuserLogin NOTIFY userLoginChanged) // 信号和槽的集成，用户登录
     Q_PROPERTY(QString history READ history WRITE sethistory NOTIFY historyChanged)         // 信号和槽的集成，历史记录
 
 public:
-    explicit BrowserController(QObject* parent=nullptr);
+    explicit BrowserController(QGuiApplication& app, QQmlApplicationEngine& engine,QObject* parent=nullptr);
     ~BrowserController();
 
     // 加载插件
@@ -42,7 +51,7 @@ public:
         }
     }
 
-    int isRecord(){
+    int isRecord() const{
         return m_isRecord;
     }
     void setisRecord(bool isRecord){
@@ -50,6 +59,26 @@ public:
             m_isRecord=isRecord;
             emit isRecordChanged();
         }
+    }
+
+    // 屏蔽广告
+    int isPreventAds() const{return m_isPreventAds;}
+    void setisPreventAds(bool isPreventAds){
+        if(m_isPreventAds!=isPreventAds){
+            m_isPreventAds=isPreventAds;
+            if(m_isPreventAds==true){
+                m_pWebProfile->setRequestInterceptor(m_adBlock);
+                Setting::GetInstance().SetValue("PreventAds","1");
+                Logger::GetInstance().LogInfo("set PreventAds True");
+            }else{
+                m_pWebProfile->setRequestInterceptor(nullptr);
+                m_adBlock->clearPatterns();
+                Setting::GetInstance().SetValue("PreventAds","0");
+                Logger::GetInstance().LogInfo("set PreventAds False");
+            }
+            emit isPreventAdsChanged();
+        }
+
     }
 
     // 截图插件的操作
@@ -136,25 +165,94 @@ public slots:
         return ans;
     }
 
+    int getLanguage() const{
+        return m_translator->getLanguage();
+    }
+    bool setLanguage(int indexOfLanguage){
+        return m_translator->setLanguage(indexOfLanguage);
+    }
+
+    // webengine prfile
+    void processWebEngineProfile(QWebEngineProfile* profile){
+        QObject *webEngineProfileObj=nullptr;
+        for(QObject* rootObject : m_translator->getQmlEngine()->rootObjects()){
+            webEngineProfileObj=findObjectByName(rootObject,"WebEngineP");
+            if(webEngineProfileObj){
+                qDebug()<<"QWebEngineProfile object found in QML";
+                Logger::GetInstance().LogInfo("QWebEngineProfile object found in QML");
+                break;
+            }
+        }
+        if(!webEngineProfileObj){
+            qDebug()<<"QWebEngineProfile object not found in QML";
+            Logger::GetInstance().LogInfo("QWebEngineProfile object not found in QML");
+            return;
+        }
+        m_pWebProfile=((QWebEngineProfile*)webEngineProfileObj);
+    }
+private:
+    QObject* findObjectByName(QObject* parent,const QString &name){
+        if(parent->objectName()==name)
+            return parent;
+        for(QObject* child:parent->children()){
+            QObject* foundObj=findObjectByName(child,name);
+            if(foundObj) return foundObj;
+        }
+        return nullptr;
+    }
+
+    void printCookies(QWebEngineProfile* profile){
+        QWebEngineCookieStore* cookieStore=profile->cookieStore();
+        QObject::connect(cookieStore,&QWebEngineCookieStore::cookieAdded,[cookieStore](const QNetworkCookie& cookie){
+            qDebug()<<"Added cookie:";
+            qDebug()<<"name: "<<cookie.name();
+            qDebug()<<"value: "<<cookie.value();
+            qDebug()<<"domain: "<<cookie.domain();
+            qDebug()<<"path: "<<cookie.path();
+            qDebug()<<"expiration: "<<cookie.expirationDate();
+        });
+        QObject::connect(cookieStore,&QWebEngineCookieStore::cookieRemoved,[](const QNetworkCookie& cookie){
+            qDebug()<<"Removed cookie:";
+            qDebug()<<"name: "<<cookie.name();
+            qDebug()<<"value: "<<cookie.value();
+            qDebug()<<"domain: "<<cookie.domain();
+            qDebug()<<"path: "<<cookie.path();
+            qDebug()<<"expiration: "<<cookie.expirationDate();
+        });
+    }
 signals:
     void bookMarkChanged();
     void userLoginChanged();
     void historyChanged();
     void isRecordChanged();
+    void isPreventAdsChanged();
 
 private:
+    // 书签
     QString m_bookMarkStr;
     BookMark* m_bookMark;
 
+    // 用户
     QString m_userLoginStr;
     User* m_user;
 
+    // 历史
     QString m_historyStr;
     History* m_history;
+    // 是否无痕浏览
     bool m_isRecord;
 
-    UrlFilter* m_urlFilter;
+    // 浏览器配置的profile
+    QWebEngineProfile* m_pWebProfile;
+    // 广告
+    bool m_isPreventAds;
+    AdBlockInterceptor* m_adBlock;
 
+    // 地址网页浏览
+    UrlFilter* m_urlFilter;
+    // 语言翻译
+    LanguageTranslator* m_translator;
+    // 插件
     QVector<BrowserPluginInterface*> m_pluginInterface;
 };
 

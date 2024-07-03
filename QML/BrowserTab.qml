@@ -34,7 +34,7 @@ TabButton {
             elide: Text.ElideMiddle                 // 若是展示不下，则省略中间数据
         }
         ToolButton{ // 用来关闭网页
-            text: qsTr("✖")
+            text: qsTr("X")
             onClicked: webview.triggerWebAction(WebEngineView.RequestClose) // 设定事件
             font.pixelSize: 30
         }
